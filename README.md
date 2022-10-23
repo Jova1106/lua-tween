@@ -1,3 +1,4 @@
+# A GMod Lua Tween object
 # Example Clientside Usage:
 
 	local vector2_tween = Tween(Vector2(500, 400), Vector2(700, 500), 1, TWEEN_EASE_QUAD_IN_OUT)
