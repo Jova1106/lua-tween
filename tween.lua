@@ -181,7 +181,7 @@ local function type(v)
 	return _type(v)
 end
 
-local function Vector2(x, y)
+function Vector2(x, y)
 	local Vector2 = {
 		x = x,
 		y = y
