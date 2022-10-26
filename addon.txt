@@ -1,0 +1,8 @@
+"AddonInfo"
+{
+	"name"			"Tween"
+	"version"		"1.0"
+	"author_name"	"Jova"
+	"info"			"Tween"
+	"override"		"0"
+}

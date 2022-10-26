@@ -1,147 +1,171 @@
--- EASING FUNCTIONS --
+-- MIT License
+
+-- Copyright (c) 2022 Jova1106
+
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to deal
+-- in the Software without restriction, including without limitation the rights
+-- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+-- copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions:
+
+-- The above copyright notice and this permission notice shall be included in all
+-- copies or substantial portions of the Software.
+
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+-- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+-- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+-- SOFTWARE.
+
+--------------------------------------------------------------------------------
+
+-- EASING FUNCTIONS
 local math_pi = math.pi
 local math_pow = math.pow
 local math_sqrt = math.sqrt
 local math_sin = math.sin
 local math_cos = math.cos
 
-local function TWEEN_EASE_LINEAR(n) -- easeLinear
+function TWEEN_EASE_LINEAR(n)
 	return n
 end
 
-local function TWEEN_EASE_IN_OUT(n) -- easeInOut
+function TWEEN_EASE_IN_OUT(n)
 	return n * n * (3 - 2 * n)
 end
 
 -- Credit: https://easings.net/
-local function TWEEN_EASE_SINE_IN(n) -- easeInSine
+function TWEEN_EASE_SINE_IN(n)
 	return 1 - math_cos(n * math_pi / 2)
 end
 
-local function TWEEN_EASE_SINE_OUT(n) -- easeOutSine
+function TWEEN_EASE_SINE_OUT(n)
 	return math_sin(n * math_pi / 2)
 end
 
-local function TWEEN_EASE_SINE_IN_OUT(n) -- easeInOutSine
+function TWEEN_EASE_SINE_IN_OUT(n)
 	return -(math_cos(math_pi * n) - 1) / 2
 end
 
-local function TWEEN_EASE_QUAD_IN(n) -- easeInQuad
+function TWEEN_EASE_QUAD_IN(n)
 	return n * n
 end
 
-local function TWEEN_EASE_QUAD_OUT(n) -- easeOutQuad
+function TWEEN_EASE_QUAD_OUT(n)
 	return 1 - (1 - n) * (1 - n)
 end
 
-local function TWEEN_EASE_QUAD_IN_OUT(n) -- easeInOutQuad
+function TWEEN_EASE_QUAD_IN_OUT(n)
 	return n < 0.5 and 2 * n * n or 1 - math_pow(-2 * n + 2, 2) / 2
 end
 
-local function TWEEN_EASE_CUBIC_IN(n) -- easeInCubic
+function TWEEN_EASE_CUBIC_IN(n)
 	return n * n * n
 end
 
-local function TWEEN_EASE_CUBIC_OUT(n) -- easeOutCubic
+function TWEEN_EASE_CUBIC_OUT(n)
 	return 1 - math_pow(1 - n, 3)
 end
 
-local function TWEEN_EASE_CUBIC_IN_OUT(n) -- easeInOutCubic
+function TWEEN_EASE_CUBIC_IN_OUT(n)
 	return n < 0.5 and 4 * n * n * n or 1 - math_pow(-2 * n + 2, 3) / 2
 end
 
-local function TWEEN_EASE_QUART_IN(n) -- easeInQuart
+function TWEEN_EASE_QUART_IN(n)
 	return n * n * n * n
 end
 
-local function TWEEN_EASE_QUART_OUT(n) -- easeOutQuart
+function TWEEN_EASE_QUART_OUT(n)
 	return 1 - math_pow(1 - n, 4)
 end
 
-local function TWEEN_EASE_QUART_IN_OUT(n) -- easeInOutQuart
+function TWEEN_EASE_QUART_IN_OUT(n)
 	return n < 0.5 and 8 * n * n * n * n or 1 - math_pow(-2 * n + 2, 4) / 2
 end
 
-local function TWEEN_EASE_QUINT_IN(n) -- easeInQuint
+function TWEEN_EASE_QUINT_IN(n)
 	return n * n * n * n * n
 end
 
-local function TWEEN_EASE_QUINT_OUT(n) -- easeOutQuint
+function TWEEN_EASE_QUINT_OUT(n)
 	return 1 - math_pow(1 - n, 5)
 end
 
-local function TWEEN_EASE_QUINT_IN_OUT(n) -- easeInOutQuint
+function TWEEN_EASE_QUINT_IN_OUT(n)
 	return n < 0.5 and 16 * n * n * n * n * n or 1 - math_pow(-2 * n + 2, 5) / 2
 end
 
-local function TWEEN_EASE_EXPO_IN(n) -- easeInExpo
+function TWEEN_EASE_EXPO_IN(n)
 	return n == 0 and 0 or math_pow(2, 10 * n - 10)
 end
 
-local function TWEEN_EASE_EXPO_OUT(n) -- easeOutExpo
+function TWEEN_EASE_EXPO_OUT(n)
 	return n == 1 and 1 or 1 - math_pow(2, -10 * n)
 end
 
-local function TWEEN_EASE_EXPO_IN_OUT(n) -- easeInOutExpo
+function TWEEN_EASE_EXPO_IN_OUT(n)
 	return n == 0 and 0 or n == 1 and 1 or n < 0.5 and math_pow(2, 20 * n - 10) / 2 or (2 - math_pow(2, -20 * n + 10)) / 2
 end
 
-local function TWEEN_EASE_CIRC_IN(n) -- easeInCirc
+function TWEEN_EASE_CIRC_IN(n)
 	return 1 - math_sqrt(1 - math_pow(n, 2))
 end
 
-local function TWEEN_EASE_CIRC_OUT(n) -- easeOutCirc
+function TWEEN_EASE_CIRC_OUT(n)
 	return math_sqrt(1 - math_pow(n - 1, 2))
 end
 
-local function TWEEN_EASE_CIRC_IN_OUT(n) -- easeInOutCirc
+function TWEEN_EASE_CIRC_IN_OUT(n)
 	return n < 0.5 and (1 - math_sqrt(1 - math_pow(2 * n, 2))) / 2 or (math_sqrt(1 - math_pow(-2 * n + 2, 2)) + 1) / 2
 end
 
-local function TWEEN_EASE_BACK_IN(n) -- easeInBack
+function TWEEN_EASE_BACK_IN(n)
 	local c1 = 1.70158
 	local c3 = c1 + 1
 
 	return c3 * n * n * n - c1 * n * n
 end
 
-local function TWEEN_EASE_BACK_OUT(n) -- easeOutBack
+function TWEEN_EASE_BACK_OUT(n)
 	local c1 = 1.70158
 	local c3 = c1 + 1
 
 	return 1 + c3 * math_pow(n - 1, 3) + c1 * math_pow(n - 1, 2)
 end
 
-local function TWEEN_EASE_BACK_IN_OUT(n) -- easeInOutBack
+function TWEEN_EASE_BACK_IN_OUT(n)
 	local c1 = 1.70158
 	local c2 = c1 * 1.525
 
 	return n < 0.5 and (math_pow(2 * n, 2) * ((c2 + 1) * 2 * n - c2)) / 2 or (math_pow(2 * n - 2, 2) * ((c2 + 1) * (n * 2 - 2) + c2) + 2) / 2
 end
 
-local function TWEEN_EASE_ELASTIC_IN(n) -- easeInElastic
+function TWEEN_EASE_ELASTIC_IN(n)
 	local c4 = (2 * math_pi) / 3
 
 	return n == 0 and 0 or n == 1 and 1 or -math_pow(2, 10 * n - 10) * math_sin((n * 10 - 10.75) * c4)
 end
 
-local function TWEEN_EASE_ELASTIC_OUT(n) -- easeOutElastic
+function TWEEN_EASE_ELASTIC_OUT(n)
 	local c4 = (2 * math_pi) / 3
 
 	return n == 0 and 0 or n == 1 and 1 or math_pow(2, -10 * n) * math_sin((n * 10 - 0.75) * c4) + 1
 end
 
-local function TWEEN_EASE_ELASTIC_IN_OUT(n) -- easeInOutElastic
+function TWEEN_EASE_ELASTIC_IN_OUT(n)
 	local c5 = (2 * math_pi) / 4.5
 
 	return n == 0 and 0 or n == 1 and 1 or n < 0.5 and -(math_pow(2, 20 * n - 10) * math_sin((20 * n - 11.125) * c5)) / 2 or (math_pow(2, -20 * n + 10) * math_sin((20 * n - 11.125) * c5)) / 2 + 1
 end
 
-local function TWEEN_EASE_BOUNCE_IN(n) -- easeInBounce
+function TWEEN_EASE_BOUNCE_IN(n)
 	return 1 - TWEEN_EASE_BOUNCE_OUT(1 - n)
 end
 
-local function TWEEN_EASE_BOUNCE_OUT(n) -- easeOutBounce
+function TWEEN_EASE_BOUNCE_OUT(n)
 	local n1 = 7.5625
 	local d1 = 2.75
 
@@ -156,29 +180,18 @@ local function TWEEN_EASE_BOUNCE_OUT(n) -- easeOutBounce
 	end
 end
 
-local function TWEEN_EASE_BOUNCE_IN_OUT(n) -- easeInOutBounce
+function TWEEN_EASE_BOUNCE_IN_OUT(n)
 	return n < 0.5 and (1 - TWEEN_EASE_BOUNCE_OUT(1 - 2 * n)) / 2 or (1 + TWEEN_EASE_BOUNCE_OUT(2 * n - 1)) / 2
 end
 --------------------------------------------------------------------------------
 
 -- Basic Vector2 Object
-local metaTable_Vector2 = {
-	MetaName = "Vector2"
-}
+local metaTable_Vector2 = {}
 
 metaTable_Vector2.__index = metaTable_Vector2
 
 local function isvector2(v)
 	return getmetatable(v) == metaTable_Vector2
-end
-
-local _type = type
-local function type(v)
-	if isvector2(v) then
-		return metaTable_Vector2.MetaName
-	end
-	
-	return _type(v)
 end
 
 function Vector2(x, y)
@@ -229,7 +242,10 @@ local metaTable_Tween = {
 		self.end_time = self.start_time + self.duration
 		self.running = true
 
-		self.lerp_type = type_to_function[type(self.from):lower()]
+		local from = self.from
+		local _type = isvector2(from) and "vector2" or type(from):lower()
+
+		self.lerp_type = type_to_function[_type]
 		
 		all_tweens[self] = true
 	end,
