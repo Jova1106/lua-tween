@@ -185,8 +185,16 @@ function TWEEN_EASE_BOUNCE_IN_OUT(n)
 end
 --------------------------------------------------------------------------------
 
+local iscolor = IsColor
+local type = type
+
 -- Basic Vector2 Object
-local metaTable_Vector2 = {}
+local metaTable_Vector2 = {
+	SetUnpacked = function(self, x, y)
+		self.x = x
+		self.y = y
+	end
+}
 
 metaTable_Vector2.__index = metaTable_Vector2
 
@@ -208,8 +216,19 @@ local function Lerp(from, to, t)
 	return from + (to - from) * t
 end
 
+local function Lerp2(_, from, to, t)
+	return from + (to - from) * t
+end
+
 local function LerpVector2(from, to, t)
 	return Vector2(
+		Lerp(from.x, to.x, t),
+		Lerp(from.y, to.y, t)
+	)
+end
+
+local function LerpVector2Unpacked(vector2, from, to, t)
+	vector2:SetUnpacked(
 		Lerp(from.x, to.x, t),
 		Lerp(from.y, to.y, t)
 	)
@@ -223,14 +242,54 @@ local function LerpVector(from, to, t)
 	)
 end
 
+local function LerpVectorUnpacked(vector, from, to, t)
+	vector:SetUnpacked(
+		Lerp(from.x, to.x, t),
+		Lerp(from.y, to.y, t),
+		Lerp(from.z, to.z, t)
+	)
+end
+
+local function LerpColor(from, to, t)
+	return Color(
+		Lerp(from.r, to.r, t),
+		Lerp(from.g, to.g, t),
+		Lerp(from.b, to.b, t),
+		Lerp(from.a, to.a, t)
+	)
+end
+
+local function LerpColorUnpacked(color, from, to, t)
+	color:SetUnpacked(
+		Lerp(from.r, to.r, t),
+		Lerp(from.g, to.g, t),
+		Lerp(from.b, to.b, t),
+		Lerp(from.a, to.a, t)
+	)
+end
+
 -- Tween Object
 local all_tweens = {}
 
 local type_to_function = {
 	["number"] = Lerp,
 	["vector2"] = LerpVector2,
-	["vector"] = LerpVector
+	["vector"] = LerpVector,
+	["color"] = LerpColor
 }
+
+local type_to_function_unpacked = {
+	["number"] = Lerp2,
+	["vector2"] = LerpVector2Unpacked,
+	["vector"] = LerpVectorUnpacked,
+	["color"] = LerpColorUnpacked
+}
+
+local function tween_type(object)
+	return isvector2(object) and "vector2"
+		or iscolor(object) and "color"
+		or type(object):lower()
+end
 
 local metaTable_Tween = {
 	__newindex = function(self, key, value)
@@ -243,7 +302,7 @@ local metaTable_Tween = {
 		self.running = true
 
 		local from = self.from
-		local _type = isvector2(from) and "vector2" or type(from):lower()
+		local _type = tween_type(from)
 
 		self.lerp_type = type_to_function[_type]
 		
@@ -280,7 +339,7 @@ local metaTable_Tween = {
 
 metaTable_Tween.__index = metaTable_Tween
 
-function Tween( from, to, duration, ease_type, callback )
+function Tween(from, to, duration, ease_type, callback)
 	local Tween = {
 		from = from,
 		to = to,
@@ -291,6 +350,68 @@ function Tween( from, to, duration, ease_type, callback )
 	}
 	
 	return setmetatable(Tween, metaTable_Tween)
+end
+
+local metaTable_TweenUnpacked = {
+	__newindex = function(self, key, value)
+		rawset(self, key, value)
+	end,
+	
+	Start = function(self)
+		self.start_time = SysTime()
+		self.end_time = self.start_time + self.duration
+		self.running = true
+
+		local base_object = self.base_object
+		local _type = tween_type(base_object)
+
+		self.lerp_type_unpacked = type_to_function_unpacked[_type]
+
+		all_tweens[self] = true
+	end,
+	
+	Update = function(self)
+		if self.running then
+			local time = SysTime()
+			
+			if time >= self.end_time then
+				self.running = false
+				self.value = self.to
+				
+				all_tweens[self] = nil
+
+				if self.callback != nil then
+					self.callback()
+				end
+				
+				return
+			end
+			
+			local alpha = (time - self.start_time) / self.duration
+			
+			self.value = self.lerp_type_unpacked(self.base_object, self.from, self.to, self.ease_type(alpha))
+		end
+	end,
+	
+	GetValue = function(self)
+		return self.value
+	end
+}
+
+metaTable_TweenUnpacked.__index = metaTable_TweenUnpacked
+
+function TweenUnpacked(base_object, from, to, duration, ease_type, callback)
+	local Tween = {
+		base_object = base_object,
+		from = from,
+		to = to,
+		duration = duration,
+		ease_type = ease_type,
+		callback = callback,
+		value = from
+	}
+	
+	return setmetatable(Tween, metaTable_TweenUnpacked)
 end
 
 -- Tween Handler
