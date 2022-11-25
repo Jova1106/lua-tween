@@ -308,6 +308,32 @@ local metaTable_Tween = {
 		
 		all_tweens[self] = true
 	end,
+
+	SetFrom = function(self, from)
+		self.from = from
+	end,
+
+	SetTo = function(self, to)
+		self.to = to
+	end,
+
+	SetDuration = function(self, duration)
+		self.duration = duration
+	end,
+
+	SetEaseType = function(self, ease_type)
+		self.ease_type = ease_type
+	end,
+
+	Restart = function(self)
+		self.start_time = SysTime()
+		self.end_time = self.start_time + self.duration
+		self.running = true
+	end,
+
+	SetPermanent = function(self, bool)
+		self.permanent = bool
+	end,
 	
 	Update = function(self)
 		if self.running then
@@ -317,7 +343,9 @@ local metaTable_Tween = {
 				self.running = false
 				self.value = self.to
 				
-				all_tweens[self] = nil
+				if !self.permanent then
+					all_tweens[self] = nil
+				end
 
 				if self.callback != nil then
 					self.callback()
@@ -334,6 +362,10 @@ local metaTable_Tween = {
 	
 	GetValue = function(self)
 		return self.value
+	end,
+
+	Destroy = function(self)
+		all_tweens[self] = nil
 	end
 }
 
@@ -346,7 +378,8 @@ function Tween(from, to, duration, ease_type, callback)
 		duration = duration,
 		ease_type = ease_type,
 		callback = callback,
-		value = from
+		value = from,
+		permanent = false
 	}
 	
 	return setmetatable(Tween, metaTable_Tween)
@@ -369,6 +402,32 @@ local metaTable_TweenUnpacked = {
 
 		all_tweens[self] = true
 	end,
+
+	SetFrom = function(self, from)
+		self.from = from
+	end,
+
+	SetTo = function(self, to)
+		self.to = to
+	end,
+
+	SetDuration = function(self, duration)
+		self.duration = duration
+	end,
+
+	SetEaseType = function(self, ease_type)
+		self.ease_type = ease_type
+	end,
+
+	Restart = function(self)
+		self.start_time = SysTime()
+		self.end_time = self.start_time + self.duration
+		self.running = true
+	end,
+
+	SetPermanent = function(self, bool)
+		self.permanent = bool
+	end,
 	
 	Update = function(self)
 		if self.running then
@@ -378,7 +437,9 @@ local metaTable_TweenUnpacked = {
 				self.running = false
 				self.value = self.to
 				
-				all_tweens[self] = nil
+				if !self.permanent then
+					all_tweens[self] = nil
+				end
 
 				if self.callback != nil then
 					self.callback()
@@ -395,6 +456,10 @@ local metaTable_TweenUnpacked = {
 	
 	GetValue = function(self)
 		return self.value
+	end,
+
+	Destroy = function(self)
+		all_tweens[self] = nil
 	end
 }
 
@@ -408,7 +473,8 @@ function TweenUnpacked(base_object, from, to, duration, ease_type, callback)
 		duration = duration,
 		ease_type = ease_type,
 		callback = callback,
-		value = from
+		value = from,
+		permanent = false
 	}
 	
 	return setmetatable(Tween, metaTable_TweenUnpacked)
