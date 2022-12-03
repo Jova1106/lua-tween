@@ -185,6 +185,17 @@ function TWEEN_EASE_BOUNCE_IN_OUT(n)
 end
 --------------------------------------------------------------------------------
 
+-- table.Inherit without the self.BaseClass table
+local function table_Inherit(target, base)
+	for k, v in next, base do
+		if target[k] then continue end
+		
+		target[k] = v
+	end
+	
+	return target
+end
+
 local iscolor = IsColor
 local type = type
 
@@ -432,10 +443,6 @@ function Tween(from, to, duration, ease_type, callback)
 end
 
 local metaTable_TweenUnpacked = {
-	__newindex = function(self, key, value)
-		rawset(self, key, value)
-	end,
-	
 	Start = function(self)
 		self.start_time = SysTime()
 		self.end_time = self.start_time + self.duration
@@ -447,67 +454,6 @@ local metaTable_TweenUnpacked = {
 		self.lerp_type_unpacked = type_to_function_unpacked[_type]
 		
 		all_tweens[self] = true
-	end,
-	
-	SetPermanent = function(self, bool)
-		self.permanent = bool
-	end,
-	
-	SetFrom = function(self, from)
-		self.from = from
-	end,
-	
-	SetTo = function(self, to)
-		self.to = to
-	end,
-	
-	SetDuration = function(self, duration)
-		self.duration = duration
-	end,
-	
-	SetEaseType = function(self, ease_type)
-		self.ease_type = ease_type
-	end,
-	
-	Restart = function(self)
-		self.start_time = SysTime()
-		self.end_time = self.start_time + self.duration
-		self.running = true
-		
-		if stopped_tweens[self] then
-			stopped_tweens[self] = nil
-			all_tweens[self] = true
-		end
-	end,
-	
-	Pause = function(self)
-		self.running = false
-		
-		if all_tweens[self] then
-			all_tweens[self] = nil
-			paused_tweens[self] = true
-		end
-	end,
-	
-	Resume = function(self)
-		self.running = true
-		self.start_time = SysTime() - (self.duration - self.time_left)
-		self.end_time = self.start_time + self.duration
-		
-		if paused_tweens[self] then
-			paused_tweens[self] = nil
-			all_tweens[self] = true
-		end
-	end,
-	
-	Stop = function(self)
-		self.running = false
-		self.stopped = true
-		
-		if all_tweens[self] then
-			all_tweens[self] = nil
-			stopped_tweens[self] = true
-		end
 	end,
 	
 	Update = function(self)
@@ -534,20 +480,10 @@ local metaTable_TweenUnpacked = {
 			
 			self.value = self.lerp_type_unpacked(self.base_object, self.from, self.to, self.ease_type(alpha))
 		end
-	end,
-	
-	TimeLeft = function(self)
-		return self.time_left
-	end,
-	
-	GetValue = function(self)
-		return self.value
-	end,
-	
-	Destroy = function(self)
-		all_tweens[self] = nil
 	end
 }
+
+table_Inherit(metaTable_TweenUnpacked, metaTable_Tween)
 
 metaTable_TweenUnpacked.__index = metaTable_TweenUnpacked
 
