@@ -312,6 +312,7 @@ local metaTable_Tween = {
 	Start = function(self)
 		self.start_time = SysTime()
 		self.end_time = self.start_time + self.duration
+		self.time_left = self.duration
 		self.running = true
 		
 		local from = self.from
@@ -345,6 +346,7 @@ local metaTable_Tween = {
 	Restart = function(self)
 		self.start_time = SysTime()
 		self.end_time = self.start_time + self.duration
+		self.time_left = self.duration
 		self.running = true
 		
 		if stopped_tweens[self] then
@@ -446,6 +448,7 @@ local metaTable_TweenUnpacked = {
 	Start = function(self)
 		self.start_time = SysTime()
 		self.end_time = self.start_time + self.duration
+		self.time_left = self.duration
 		self.running = true
 		
 		local base_object = self.base_object
