@@ -1,6 +1,6 @@
 # A GMod Lua Tween object
-# Example Clientside Usage:
-# Regular Tween Object:
+## Example Clientside Usage:
+### Regular Tween Object:
 
 	local vector2_tween = Tween(Vector2(500, 400), Vector2(700, 500), 1, TWEEN_EASE_QUAD_IN_OUT)
 	local number_tween = Tween(300, 20, 0.5, TWEEN_EASE_QUAD_OUT)
@@ -35,7 +35,7 @@
 		render.DrawSphere(vector_tween_value, 50, 10, 10, Color(255, 0, 0))
 	end)
 
-# TweenUnpacked Object:
+### TweenUnpacked Object:
 
 	local color = Color(255, 0, 0, 255)
 	local color_tween = TweenUnpacked(color, Color(255, 25, 35), Color(75, 185, 40, 150), 1, TWEEN_EASE_QUAD_OUT)
