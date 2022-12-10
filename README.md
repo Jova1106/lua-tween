@@ -1,7 +1,7 @@
 # A GMod Lua Tween object
 ## Example Clientside Usage:
 ### Regular Tween Object:
-
+```
 	local vector2_tween = Tween(Vector2(500, 400), Vector2(700, 500), 1, TWEEN_EASE_QUAD_IN_OUT)
 	local number_tween = Tween(300, 20, 0.5, TWEEN_EASE_QUAD_OUT)
 	local vector_tween = Tween(Vector(0,0,0), Vector(100,100,100), 3, TWEEN_EASE_LINEAR)
@@ -34,9 +34,10 @@
 		render.SetColorMaterial()
 		render.DrawSphere(vector_tween_value, 50, 10, 10, Color(255, 0, 0))
 	end)
+```
 
 ### TweenUnpacked Object:
-
+```
 	local color = Color(255, 0, 0, 255)
 	local color_tween = TweenUnpacked(color, Color(255, 25, 35), Color(75, 185, 40, 150), 1, TWEEN_EASE_QUAD_OUT)
 
@@ -47,5 +48,6 @@
 	hook.Add("HUDPaint", "draw_color_tween", function()
 		draw.RoundedBox(0, 500, 650, 100, 20, color)
 	end)
+```
 
 Note: Numbers technically work with TweenUnpacked, but since numbers aren't objects, they can't be manipulated in the same way that an object like a Vector can, so if you try to tween a number with TweenUnpacked, you still have to use tween:GetValue(), or just use the regular Tween object.
