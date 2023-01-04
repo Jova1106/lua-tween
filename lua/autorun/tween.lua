@@ -423,6 +423,10 @@ local metaTable_Tween = {
 		all_tweens[self] = nil
 		paused_tweens[self] = nil
 		stopped_tweens[self] = nil
+	end,
+	
+	SetCallback = function(self, callback)
+		self.callback = callback
 	end
 }
 
