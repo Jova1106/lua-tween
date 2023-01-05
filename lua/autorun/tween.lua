@@ -399,7 +399,7 @@ local metaTable_Tween = {
 				end
 				
 				if self.callback != nil then
-					self.callback()
+					self.callback(self)
 				end
 				
 				return
