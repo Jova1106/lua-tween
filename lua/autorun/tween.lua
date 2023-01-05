@@ -335,6 +335,11 @@ local metaTable_Tween = {
 		self.to = to
 	end,
 	
+	SetWaypoints = function(self, from, to)
+		self.from = from
+		self.to = to
+	end,
+
 	SetDuration = function(self, duration)
 		self.duration = duration
 	end,
