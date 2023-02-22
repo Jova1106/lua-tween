@@ -5,7 +5,7 @@
 local vector2_tween = Tween(Vector2(500, 400), Vector2(700, 500), 1, TWEEN_EASE_QUAD_IN_OUT)
 local number_tween = Tween(300, 20, 0.5, TWEEN_EASE_QUAD_OUT)
 local vector_tween = Tween(Vector(0,0,0), Vector(100,100,100), 3, TWEEN_EASE_LINEAR)
-local color_tween = TweenUnpacked(Color(255, 25, 35, 80), Color(75, 185, 40, 150), 1, TWEEN_EASE_QUAD_OUT)
+local color_tween = Tween(Color(255, 25, 35, 80), Color(75, 185, 40, 150), 1, TWEEN_EASE_QUAD_OUT)
 
 timer.Simple(1.25, function()
 	vector2_tween:Start()
@@ -24,7 +24,7 @@ hook.Add("HUDPaint", "draw_2d_tweens", function()
 	draw.RoundedBox(0, 500, 650, number_tween_value, 20, Color(255, 0, 0))
 
 	-- Color Tween
-	local color_tween_value = number_tween:GetValue()
+	local color_tween_value = color_tween:GetValue()
 	draw.RoundedBox(0, 500, 700, 100, 20, color_tween_value)
 end)
 
