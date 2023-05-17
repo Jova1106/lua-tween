@@ -36,6 +36,30 @@ hook.Add("PostDrawTranslucentRenderables", "draw_3d_tweens", function()
 end)
 
 -- Bezier Tweens
+local function QuadraticBezier(p1, c1, p2, t)
+	local x1 = Lerp(p1.x, c1.x, t)
+	local y1 = Lerp(p1.y, c1.y, t)
+	local x2 = Lerp(c1.x, p2.x, t)
+	local y2 = Lerp(c1.y, p2.y, t)
+	local z1 = Lerp(p1.z, c1.z, t)
+	local z2 = Lerp(c1.z, p2.z, t)
+	local x = Lerp(x1, x2, t)
+	local y = Lerp(y1, y2, t)
+	local z = Lerp(z1, z2, t)
+	
+	return Vector(x, y, z)
+end
+
+local function CubicBezier(p1, c1, c2, p2, t)	
+	local v1 = QuadraticBezier(p1, c1, c2, t)
+	local v2 = QuadraticBezier(c1, c2, p2, t)
+	local x = Lerp(v1.x, v2.x, t)
+	local y = Lerp(v1.y, v2.y, t)
+	local z = Lerp(v1.z, v2.z, t)
+	
+	return Vector(x, y, z)
+end
+
 local bezier_start = Vector(0, 0, 0)
 local bezier_end = Vector(100, 100, 0)
 local z_diff = math.max(bezier_start.z, bezier_end.z) - math.min(bezier_start.z, bezier_end.z)
@@ -48,9 +72,9 @@ local bezier_type = "quadratic"
 
 for i = 0, 1.01, delta do
 	if bezier_type == "quadratic" then
-		table.insert(bezier_list, math.QuadraticBezier(bezier_start, bezier_control_point, bezier_end, i))
+		table.insert(bezier_list, QuadraticBezier(bezier_start, bezier_control_point, bezier_end, i))
 	elseif bezier_type == "cubic" then
-		table.insert(bezier_list, math.CubicBezier(bezier_start, bezier_control_point2, bezier_control_point3, bezier_end, i))
+		table.insert(bezier_list, CubicBezier(bezier_start, bezier_control_point2, bezier_control_point3, bezier_end, i))
 	end
 end
 
