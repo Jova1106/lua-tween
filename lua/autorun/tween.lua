@@ -196,9 +196,6 @@ local function table_Inherit(target, base)
 	return target
 end
 
-local iscolor = IsColor
-local type = type
-
 -- Basic Vector2 Object
 local metaTable_Vector2 = {
 	SetUnpacked = function(self, x, y)
@@ -253,6 +250,30 @@ local function LerpVector(from, to, t)
 	)
 end
 
+local function QuadraticBezier(p1, c1, p2, t)
+	local x1 = Lerp(p1.x, c1.x, t)
+	local y1 = Lerp(p1.y, c1.y, t)
+	local x2 = Lerp(c1.x, p2.x, t)
+	local y2 = Lerp(c1.y, p2.y, t)
+	local z1 = Lerp(p1.z, c1.z, t)
+	local z2 = Lerp(c1.z, p2.z, t)
+	local x = Lerp(x1, x2, t)
+	local y = Lerp(y1, y2, t)
+	local z = Lerp(z1, z2, t)
+	
+	return Vector(x, y, z)
+end
+
+local function CubicBezier(p1, c1, c2, p2, t)	
+	local v1 = QuadraticBezier(p1, c1, c2, t)
+	local v2 = QuadraticBezier(c1, c2, p2, t)
+	local x = Lerp(v1.x, v2.x, t)
+	local y = Lerp(v1.y, v2.y, t)
+	local z = Lerp(v1.z, v2.z, t)
+	
+	return Vector(x, y, z)
+end
+
 local function LerpVectorUnpacked(vector, from, to, t)
 	vector:SetUnpacked(
 		Lerp(from.x, to.x, t),
@@ -281,6 +302,7 @@ end
 
 -- Tween Object(s)
 local all_tweens = {}
+local running_tweens = {}
 local paused_tweens = {}
 local stopped_tweens = {}
 
@@ -300,7 +322,7 @@ local type_to_function_unpacked = {
 
 local function tween_type(object)
 	return isvector2(object) and "vector2"
-		or iscolor(object) and "color"
+		or IsColor(object) and "color"
 		or type(object):lower()
 end
 
@@ -310,17 +332,14 @@ local metaTable_Tween = {
 	end,
 	
 	Start = function(self)
+		self.running = true
 		self.start_time = SysTime()
 		self.end_time = self.start_time + self.duration
 		self.time_left = self.duration
-		self.running = true
-		
-		local from = self.from
-		local _type = tween_type(from)
-		
-		self.lerp_type = type_to_function[_type]
+		self.lerp_type = type_to_function[tween_type(self.from)]
 		
 		all_tweens[self] = true
+		running_tweens[self] = true
 	end,
 	
 	SetPermanent = function(self, bool)
@@ -339,7 +358,7 @@ local metaTable_Tween = {
 		self.from = from
 		self.to = to
 	end,
-
+	
 	SetDuration = function(self, duration)
 		self.duration = duration
 	end,
@@ -349,45 +368,66 @@ local metaTable_Tween = {
 	end,
 	
 	Restart = function(self)
+		if !all_tweens[self] then
+			self:Start()
+			
+			return
+		end
+		
+		self.running = true
 		self.start_time = SysTime()
 		self.end_time = self.start_time + self.duration
 		self.time_left = self.duration
-		self.running = true
 		
-		if stopped_tweens[self] then
+		if !running_tweens[self] then
+			running_tweens[self] = true
+		end
+		
+		if paused_tweens[self] then
+			paused_tweens[self] = nil
+		elseif stopped_tweens[self] then
 			stopped_tweens[self] = nil
-			all_tweens[self] = true
 		end
 	end,
 	
 	Pause = function(self)
+		if stopped_tweens[self] then return end
+		
 		self.running = false
 		
-		if all_tweens[self] then
-			all_tweens[self] = nil
+		if running_tweens[self] then
+			running_tweens[self] = nil
 			paused_tweens[self] = true
 		end
 	end,
 	
 	Resume = function(self)
-		self.running = true
+		if stopped_tweens[self] then
+			self:Restart()
+			
+			return
+		end
+		
 		self.start_time = SysTime() - (self.duration - self.time_left)
 		self.end_time = self.start_time + self.duration
+		self.running = true
 		
 		if paused_tweens[self] then
 			paused_tweens[self] = nil
-			all_tweens[self] = true
+			running_tweens[self] = true
 		end
 	end,
 	
 	Stop = function(self)
 		self.running = false
-		self.stopped = true
 		
-		if all_tweens[self] then
-			all_tweens[self] = nil
-			stopped_tweens[self] = true
+		if running_tweens[self] then
+			running_tweens[self] = nil
+		elseif paused_tweens[self] then
+			paused_tweens[self] = nil
 		end
+		
+		stopped_tweens[self] = true
 	end,
 	
 	Update = function(self)
@@ -401,6 +441,7 @@ local metaTable_Tween = {
 				
 				if !self.permanent then
 					all_tweens[self] = nil
+					running_tweens[self] = nil
 				end
 				
 				if self.callback != nil then
@@ -412,7 +453,13 @@ local metaTable_Tween = {
 			
 			local alpha = (time - self.start_time) / self.duration
 			
-			self.value = self.lerp_type(self.from, self.to, self.ease_type(alpha))
+			if self.bezier_type == "quadratic" then
+				self.value = QuadraticBezier(self.from, self.c1, self.to, self.ease_type(alpha))
+			elseif self.bezier_type == "cubic" then
+				self.value = CubicBezier(self.from, self.c1, self.c2, self.to, self.ease_type(alpha))
+			else
+				self.value = self.lerp_type(self.from, self.to, self.ease_type(alpha))
+			end
 		end
 	end,
 	
@@ -426,12 +473,27 @@ local metaTable_Tween = {
 	
 	Destroy = function(self)
 		all_tweens[self] = nil
-		paused_tweens[self] = nil
-		stopped_tweens[self] = nil
+
+		if running_tweens[self] then
+			running_tweens[self] = nil
+		elseif paused_tweens[self] then
+			paused_tweens[self] = nil
+		elseif stopped_tweens[self] then
+			stopped_tweens[self] = nil
+		end
 	end,
 	
 	SetCallback = function(self, callback)
 		self.callback = callback
+	end,
+
+	SetBezierType = function(self, bezier_type, control_point, control_point_2)
+		self.bezier_type = bezier_type
+		self.c1 = control_point
+
+		if bezier_type == "cubic" then
+			self.c2 = control_point_2
+		end
 	end
 }
 
@@ -445,9 +507,9 @@ function Tween(from, to, duration, ease_type, callback)
 		ease_type = ease_type,
 		callback = callback,
 		value = from,
-		permanent = false,
 		time_left = duration,
-		stopped = false
+		permanent = false,
+		running = false
 	}
 	
 	return setmetatable(Tween, metaTable_Tween)
@@ -455,17 +517,14 @@ end
 
 local metaTable_TweenUnpacked = {
 	Start = function(self)
+		self.running = true
 		self.start_time = SysTime()
 		self.end_time = self.start_time + self.duration
 		self.time_left = self.duration
-		self.running = true
-		
-		local base_object = self.base_object
-		local _type = tween_type(base_object)
-		
-		self.lerp_type_unpacked = type_to_function_unpacked[_type]
+		self.lerp_type_unpacked = type_to_function_unpacked[tween_type(self.base_object)]
 		
 		all_tweens[self] = true
+		running_tweens[self] = true
 	end,
 	
 	Update = function(self)
@@ -479,6 +538,7 @@ local metaTable_TweenUnpacked = {
 				
 				if !self.permanent then
 					all_tweens[self] = nil
+					running_tweens[self] = nil
 				end
 				
 				if self.callback != nil then
@@ -508,9 +568,9 @@ function TweenUnpacked(base_object, from, to, duration, ease_type, callback)
 		ease_type = ease_type,
 		callback = callback,
 		value = from,
-		permanent = false,
 		time_left = duration,
-		stopped = false
+		permanent = false,
+		running = false
 	}
 	
 	return setmetatable(Tween, metaTable_TweenUnpacked)
@@ -518,10 +578,10 @@ end
 
 -- Tween Handler
 hook.Add( "Think", "process_tweens", function()
-	if table.IsEmpty(all_tweens) then return end
+	if table.IsEmpty(running_tweens) then return end
 	
-	for tween in next, all_tweens do
-		if tween == nil or tween.running == false then continue end
+	for tween in next, running_tweens do
+		if tween == nil then continue end
 		
 		tween:Update()
 	end
