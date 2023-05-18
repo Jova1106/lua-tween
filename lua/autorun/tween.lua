@@ -250,6 +250,26 @@ local function LerpVector(from, to, t)
 	)
 end
 
+local function LerpAng(from, to, t)
+	local d = to - from
+
+	if d > 180 then
+		to = to - 360
+	elseif d < -180 then
+		to = to + 360
+	end
+
+	return Lerp(from, to, t)
+end
+
+local function LerpAngle(from, to, t)
+	return Angle(
+		LerpAng(from.p, to.p, t),
+		LerpAng(from.y, to.y, t),
+		LerpAng(from.r, to.r, t)
+	)
+end
+
 local function QuadraticBezier(p1, c1, p2, t)
 	local x1 = Lerp(p1.x, c1.x, t)
 	local y1 = Lerp(p1.y, c1.y, t)
@@ -300,6 +320,14 @@ local function LerpColorUnpacked(color, from, to, t)
 	)
 end
 
+local function LerpAngleUnpacked(angle, from, to, t)
+	angle:SetUnpacked(
+		LerpAng(from.p, to.p, t),
+		LerpAng(from.y, to.y, t),
+		LerpAng(from.r, to.r, t)
+	)
+end
+
 -- Tween Object(s)
 local all_tweens = {}
 local running_tweens = {}
@@ -310,14 +338,16 @@ local type_to_function = {
 	["number"] = Lerp,
 	["vector2"] = LerpVector2,
 	["vector"] = LerpVector,
-	["color"] = LerpColor
+	["color"] = LerpColor,
+	["angle"] = LerpAngle
 }
 
 local type_to_function_unpacked = {
 	["number"] = Lerp2,
 	["vector2"] = LerpVector2Unpacked,
 	["vector"] = LerpVectorUnpacked,
-	["color"] = LerpColorUnpacked
+	["color"] = LerpColorUnpacked,
+	["angle"] = LerpAngleUnpacked
 }
 
 local function tween_type(object)
