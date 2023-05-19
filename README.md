@@ -1,4 +1,13 @@
 # A GMod Lua Tween object
+### Supported Tween Types:
+```
+Number
+Vector2
+Vector
+Color
+Angle
+Bezier (Quadratic/Cubic)
+```
 ## Example Clientside Usage:
 ### Regular Tween Object:
 ```Lua
