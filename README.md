@@ -45,6 +45,10 @@ hook.Add("PostDrawTranslucentRenderables", "draw_3d_tweens", function()
 end)
 
 -- Bezier Tweens
+local function Lerp(from, to, t)
+	return from + (to - from) * t
+end
+
 local function QuadraticBezier(p1, c1, p2, t)
 	local x1 = Lerp(p1.x, c1.x, t)
 	local y1 = Lerp(p1.y, c1.y, t)
