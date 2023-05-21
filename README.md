@@ -111,9 +111,9 @@ hook.Add("PostDrawTranslucentRenderables", "Bezier3D", function()
 		render.DrawLine(bezier_control_point3, bezier_end, color_white, true)
 	end
 
-	for i = 1, #bezier_list do
+	for i = 1, #bezier_list-1 do
 		local p = bezier_list[i]
-		local nextP = bezier_list[i+1] or bezier_list[i]
+		local nextP = bezier_list[i+1]
 		
 		render.DrawLine(p, nextP, color_white, true)
 	end
