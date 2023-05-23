@@ -6,7 +6,7 @@ Vector2
 Vector
 Color
 Angle
-Bezier (Quadratic/Cubic)
+BSpline/Bezier Curve
 ```
 ## Example Clientside Usage:
 ### Regular Tween Object:
