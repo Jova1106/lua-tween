@@ -185,6 +185,8 @@ function TWEEN_EASE_BOUNCE_IN_OUT(n)
 end
 --------------------------------------------------------------------------------
 
+tween = {}
+
 -- table.Inherit without the self.BaseClass table
 local function table_Inherit(target, base)
 	for k, v in next, base do
@@ -196,17 +198,52 @@ local function table_Inherit(target, base)
 	return target
 end
 
--- Basic Vector2 Object
 local metaTable_Vector2 = {
+	__add = function(self, other)
+		return Vector2(self.x + other.x, self.y + other.y)
+	end,
+	
+	__sub = function(self, other)
+		return Vector2(self.x - other.x, self.y - other.y)
+	end,
+	
+	__mul = function(self, other)
+		if isvector2(self) and isnumber(other) then
+			return Vector2(self.x * other, self.y * other)
+		elseif isnumber(self) and isvector2(other) then
+			return Vector2(self * other.x, self * other.y)
+		else
+			return Vector2(self.x * other.x, self.y * other.y)
+		end
+	end,
+	
+	__div = function(self, other)
+		if isvector2(self) and isnumber(other) then
+			return Vector2(self.x / other, self.y / other)
+		elseif isnumber(self) and isvector2(other) then
+			return Vector2(self / other.x, self / other.y)
+		else
+			return Vector2(self.x / other.x, self.y / other.y)
+		end
+	end,
+	
+	__tostring = function(self)
+		return string.format("%.6f %.6f", self.x, self.y)
+	end,
+	
 	SetUnpacked = function(self, x, y)
 		self.x = x
 		self.y = y
+	end,
+	
+	GetPos = function(self)
+		return Vector2(self.x, self.y)
 	end
 }
 
 metaTable_Vector2.__index = metaTable_Vector2
 
-local function isvector2(v)
+function isvector2(v)
 	return getmetatable(v) == metaTable_Vector2
 end
 
@@ -220,35 +257,11 @@ function Vector2(x, y)
 end
 
 -- Lerp Functions
-local function Lerp(from, to, t)
-	return from + (to - from) * t
+function tween.Lerp(from, to, t)
+	return (1 - t) * from + t * to
 end
 
-local function Lerp2(_, from, to, t)
-	return from + (to - from) * t
-end
-
-local function LerpVector2(from, to, t)
-	return Vector2(
-		Lerp(from.x, to.x, t),
-		Lerp(from.y, to.y, t)
-	)
-end
-
-local function LerpVector2Unpacked(vector2, from, to, t)
-	vector2:SetUnpacked(
-		Lerp(from.x, to.x, t),
-		Lerp(from.y, to.y, t)
-	)
-end
-
-local function LerpVector(from, to, t)
-	return Vector(
-		Lerp(from.x, to.x, t),
-		Lerp(from.y, to.y, t),
-		Lerp(from.z, to.z, t)
-	)
-end
+local Lerp = tween.Lerp
 
 local function LerpAng(from, to, t)
 	local d = to - from
@@ -262,7 +275,7 @@ local function LerpAng(from, to, t)
 	return Lerp(from, to, t)
 end
 
-local function LerpAngle(from, to, t)
+function tween.LerpAngle(from, to, t)
 	return Angle(
 		LerpAng(from.p, to.p, t),
 		LerpAng(from.y, to.y, t),
@@ -270,36 +283,18 @@ local function LerpAngle(from, to, t)
 	)
 end
 
-local function QuadraticBezier(p1, c1, p2, t)
-	local x1 = Lerp(p1.x, c1.x, t)
-	local y1 = Lerp(p1.y, c1.y, t)
-	local x2 = Lerp(c1.x, p2.x, t)
-	local y2 = Lerp(c1.y, p2.y, t)
-	local z1 = Lerp(p1.z, c1.z, t)
-	local z2 = Lerp(c1.z, p2.z, t)
-	local x = Lerp(x1, x2, t)
-	local y = Lerp(y1, y2, t)
-	local z = Lerp(z1, z2, t)
-	
-	return Vector(x, y, z)
-end
+local LerpAngle = tween.LerpAngle
 
-local function CubicBezier(p1, c1, c2, p2, t)	
-	local v1 = QuadraticBezier(p1, c1, c2, t)
-	local v2 = QuadraticBezier(c1, c2, p2, t)
-	local x = Lerp(v1.x, v2.x, t)
-	local y = Lerp(v1.y, v2.y, t)
-	local z = Lerp(v1.z, v2.z, t)
+local function LerpVector2Unpacked(vector2, from, to, t)
+	local lerped_vector2 = Lerp(from, to, t)
 	
-	return Vector(x, y, z)
+	vector2:SetUnpacked(lerped_vector2.x, lerped_vector2.y)
 end
 
 local function LerpVectorUnpacked(vector, from, to, t)
-	vector:SetUnpacked(
-		Lerp(from.x, to.x, t),
-		Lerp(from.y, to.y, t),
-		Lerp(from.z, to.z, t)
-	)
+	local lerped_vector = Lerp(from, to, t)
+	
+	vector:SetUnpacked(lerped_vector.x, lerped_vector.y, lerped_vector.z)
 end
 
 local function LerpColor(from, to, t)
@@ -328,6 +323,23 @@ local function LerpAngleUnpacked(angle, from, to, t)
 	)
 end
 
+-- Credit: WLKRE
+function tween.BSpline(points, t, --[[internal]] i, --[[internal]] c)
+	if i == nil then
+		i, c = 1, #points
+	end
+	
+	if c == 1 then return points[i] end
+	
+	local p1 = tween.BSpline(points, t, i, c - 1)
+	local p2 = tween.BSpline(points, t, i + 1, c - 1)
+	
+	return Lerp(p1, p2, t)
+end
+
+local BSpline = tween.BSpline
+--
+
 -- Tween Object(s)
 local all_tweens = {}
 local running_tweens = {}
@@ -336,14 +348,14 @@ local stopped_tweens = {}
 
 local type_to_function = {
 	["number"] = Lerp,
-	["vector2"] = LerpVector2,
-	["vector"] = LerpVector,
+	["vector2"] = Lerp,
+	["vector"] = Lerp,
 	["color"] = LerpColor,
 	["angle"] = LerpAngle
 }
 
 local type_to_function_unpacked = {
-	["number"] = Lerp2,
+	["number"] = Lerp,
 	["vector2"] = LerpVector2Unpacked,
 	["vector"] = LerpVectorUnpacked,
 	["color"] = LerpColorUnpacked,
@@ -366,7 +378,8 @@ local metaTable_Tween = {
 		self.start_time = SysTime()
 		self.end_time = self.start_time + self.duration
 		self.time_left = self.duration
-		self.lerp_type = type_to_function[tween_type(self.from)]
+		self.tween_type = tween_type(self.from)
+		self.lerp_type = type_to_function[self.tween_type]
 		
 		all_tweens[self] = true
 		running_tweens[self] = true
@@ -483,13 +496,7 @@ local metaTable_Tween = {
 			
 			local alpha = (time - self.start_time) / self.duration
 			
-			if self.bezier_type == "quadratic" then
-				self.value = QuadraticBezier(self.from, self.c1, self.to, self.ease_type(alpha))
-			elseif self.bezier_type == "cubic" then
-				self.value = CubicBezier(self.from, self.c1, self.c2, self.to, self.ease_type(alpha))
-			else
-				self.value = self.lerp_type(self.from, self.to, self.ease_type(alpha))
-			end
+			self.value = self.lerp_type(self.from, self.to, self.ease_type(alpha))
 		end
 	end,
 	
@@ -503,7 +510,7 @@ local metaTable_Tween = {
 	
 	Destroy = function(self)
 		all_tweens[self] = nil
-
+		
 		if running_tweens[self] then
 			running_tweens[self] = nil
 		elseif paused_tweens[self] then
@@ -515,15 +522,6 @@ local metaTable_Tween = {
 	
 	SetCallback = function(self, callback)
 		self.callback = callback
-	end,
-
-	SetBezierType = function(self, bezier_type, control_point, control_point_2)
-		self.bezier_type = bezier_type
-		self.c1 = control_point
-
-		if bezier_type == "cubic" then
-			self.c2 = control_point_2
-		end
 	end
 }
 
@@ -551,7 +549,8 @@ local metaTable_TweenUnpacked = {
 		self.start_time = SysTime()
 		self.end_time = self.start_time + self.duration
 		self.time_left = self.duration
-		self.lerp_type_unpacked = type_to_function_unpacked[tween_type(self.base_object)]
+		self.tween_type = tween_type(self.base_object)
+		self.lerp_type_unpacked = type_to_function_unpacked[self.tween_type]
 		
 		all_tweens[self] = true
 		running_tweens[self] = true
@@ -559,12 +558,14 @@ local metaTable_TweenUnpacked = {
 	
 	Update = function(self)
 		if self.running then
+			local to = self.to
 			local time = SysTime()
 			self.time_left = self.end_time - time
 			
 			if time >= self.end_time then
 				self.running = false
-				self.value = self.to
+				self.value = to
+				self.base_object = to
 				
 				if !self.permanent then
 					all_tweens[self] = nil
@@ -580,7 +581,13 @@ local metaTable_TweenUnpacked = {
 			
 			local alpha = (time - self.start_time) / self.duration
 			
-			self.value = self.lerp_type_unpacked(self.base_object, self.from, self.to, self.ease_type(alpha))
+			if self.tween_type == "number" then
+				self.value = Lerp(self.from, to, self.ease_type(alpha))
+			else
+				local base_object = self.base_object
+				self.lerp_type_unpacked(base_object, self.from, to, self.ease_type(alpha))
+				self.value = base_object
+			end
 		end
 	end
 }
@@ -606,8 +613,68 @@ function TweenUnpacked(base_object, from, to, duration, ease_type, callback)
 	return setmetatable(Tween, metaTable_TweenUnpacked)
 end
 
+local metaTable_BezierTween = {
+	Start = function(self)
+		self.running = true
+		self.start_time = SysTime()
+		self.end_time = self.start_time + self.duration
+		self.time_left = self.duration
+		self.value = self.points[1]
+		
+		all_tweens[self] = true
+		running_tweens[self] = true
+	end,
+	
+	Update = function(self)
+		if self.running then
+			local points = self.points
+			local time = SysTime()
+			self.time_left = self.end_time - time
+			
+			if time >= self.end_time then
+				self.running = false
+				self.value = points[#points]
+				
+				if !self.permanent then
+					all_tweens[self] = nil
+					running_tweens[self] = nil
+				end
+				
+				if self.callback != nil then
+					self.callback(self)
+				end
+				
+				return
+			end
+			
+			local alpha = (time - self.start_time) / self.duration
+			
+			self.value = BSpline(points, self.ease_type(alpha))
+		end
+	end,
+}
+
+table_Inherit(metaTable_BezierTween, metaTable_Tween)
+
+metaTable_BezierTween.__index = metaTable_BezierTween
+
+function BezierTween(points, duration, ease_type, callback)
+	local Tween = {
+		points = points,
+		duration = duration,
+		ease_type = ease_type,
+		callback = callback,
+		value = points[1],
+		time_left = duration,
+		permanent = false,
+		running = false,
+	}
+	
+	return setmetatable(Tween, metaTable_BezierTween)
+end
+
 -- Tween Handler
-hook.Add( "Think", "process_tweens", function()
+hook.Add("Think", "process_tweens", function()
 	if table.IsEmpty(running_tweens) then return end
 	
 	for tween in next, running_tweens do
@@ -615,4 +682,4 @@ hook.Add( "Think", "process_tweens", function()
 		
 		tween:Update()
 	end
-end )
+end)

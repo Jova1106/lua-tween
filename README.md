@@ -44,79 +44,49 @@ hook.Add("PostDrawTranslucentRenderables", "draw_3d_tweens", function()
 	render.DrawSphere(vector_tween_value, 50, 10, 10, Color(255, 0, 0))
 end)
 
--- Bezier Tweens
-local function Lerp(from, to, t)
-	return from + (to - from) * t
-end
+-- Bezier Tween
+function tween.DrawBezier(points, color)
+	if table.IsEmpty(points) then return end
+	render.SetColorMaterial()
+	color = color or color_white
+	local len = #points
 
-local function QuadraticBezier(p1, c1, p2, t)
-	local x1 = Lerp(p1.x, c1.x, t)
-	local y1 = Lerp(p1.y, c1.y, t)
-	local x2 = Lerp(c1.x, p2.x, t)
-	local y2 = Lerp(c1.y, p2.y, t)
-	local z1 = Lerp(p1.z, c1.z, t)
-	local z2 = Lerp(c1.z, p2.z, t)
-	local x = Lerp(x1, x2, t)
-	local y = Lerp(y1, y2, t)
-	local z = Lerp(z1, z2, t)
-	
-	return Vector(x, y, z)
-end
-
-local function CubicBezier(p1, c1, c2, p2, t)	
-	local v1 = QuadraticBezier(p1, c1, c2, t)
-	local v2 = QuadraticBezier(c1, c2, p2, t)
-	local x = Lerp(v1.x, v2.x, t)
-	local y = Lerp(v1.y, v2.y, t)
-	local z = Lerp(v1.z, v2.z, t)
-	
-	return Vector(x, y, z)
-end
-
-local bezier_start = Vector(0, 0, 0)
-local bezier_end = Vector(100, 100, 0)
-local z_diff = math.max(bezier_start.z, bezier_end.z) - math.min(bezier_start.z, bezier_end.z)
-local bezier_control_point = (bezier_start+bezier_end)/2 + Vector(0, 0, z_diff+50)
-local bezier_control_point2 = (bezier_start+bezier_end)/bezier_start:Distance(bezier_end) + Vector(0, 0, z_diff+50)
-local bezier_control_point3 = (bezier_start+bezier_end)/1 + Vector(0, 0, z_diff+50)
-local delta = 0.05
-local bezier_list = {}
-local bezier_type = "quadratic"
-
-for i = 0, 1.01, delta do
-	if bezier_type == "quadratic" then
-		table.insert(bezier_list, QuadraticBezier(bezier_start, bezier_control_point, bezier_end, i))
-	elseif bezier_type == "cubic" then
-		table.insert(bezier_list, CubicBezier(bezier_start, bezier_control_point2, bezier_control_point3, bezier_end, i))
+	for i = 1, len do
+		local p1 = points[i]
+		local p2 = points[i+1] or points[i]
+		
+		if i < len then
+			render.DrawLine(p1, p2, color, true)
+		end
+		
+		render.DrawSphere(p1, .5, 10, 10, color)
 	end
 end
 
-local bezier_tween = Tween(bezier_start, bezier_end, 1, TWEEN_EASE_LINEAR)
+local delta = 0.05
+local bezier_list = {}
+local control_points = {
+	Vector(0, 0, 0),
+	Vector(50, 50, 50),
+	Vector(-100, 100,0),
+	Vector(150,150,100),
+	Vector(200,200, -100),
+	Vector(250, 250, 200),
+	Vector(300, 300, 0),
+	Vector(350, 500, 50),
+	Vector(400, 400, 100)
+}
 
-if bezier_type == "quadratic" then
-	bezier_tween:SetBezierType("quadratic", bezier_control_point)
-elseif bezier_type == "cubic" then
-	bezier_tween:SetBezierType("cubic", bezier_control_point2, bezier_control_point3)
+for i = 0, 1.01, delta do
+	table.insert(bezier_list, tween.BSpline(control_points, i))
 end
+
+local bezier_tween = BezierTween(bezier_list, 5, TWEEN_EASE_LINEAR)
 
 bezier_tween:Start()
 
 hook.Add("PostDrawTranslucentRenderables", "Bezier3D", function()
-	if bezier_type == "quadratic" then
-		render.DrawLine(bezier_start, bezier_control_point, color_white, true)
-		render.DrawLine(bezier_control_point, bezier_end, color_white, true)
-	elseif bezier_type == "cubic" then
-		render.DrawLine(bezier_start, bezier_control_point2, color_white, true)
-		render.DrawLine(bezier_control_point2, bezier_control_point3, color_white, true)
-		render.DrawLine(bezier_control_point3, bezier_end, color_white, true)
-	end
-
-	for i = 1, #bezier_list-1 do
-		local p = bezier_list[i]
-		local nextP = bezier_list[i+1]
-		
-		render.DrawLine(p, nextP, color_white, true)
-	end
+	tween.DrawBezier(bezier_list)
 
 	local p = bezier_tween:GetValue()
 	render.SetColorMaterial()
