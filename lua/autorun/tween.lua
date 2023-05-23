@@ -323,7 +323,7 @@ local function LerpAngleUnpacked(angle, from, to, t)
 	)
 end
 
--- Credit: WLKRE
+-- Credit: WLKRE (https://github.com/JWalkerMailly)
 function tween.BSpline(points, t, --[[internal]] i, --[[internal]] c)
 	if i == nil then
 		i, c = 1, #points
