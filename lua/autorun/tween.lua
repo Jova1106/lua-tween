@@ -22,13 +22,14 @@
 
 --------------------------------------------------------------------------------
 
--- EASING FUNCTIONS
 local math_pi = math.pi
 local math_pow = math.pow
 local math_sqrt = math.sqrt
 local math_sin = math.sin
 local math_cos = math.cos
+local math_fmod = math.fmod
 
+-- EASING FUNCTIONS
 function TWEEN_EASE_LINEAR(n)
 	return n
 end
@@ -263,23 +264,21 @@ end
 
 local Lerp = tween.Lerp
 
-local function LerpAng(from, to, t)
-	local d = to - from
+local function CalcAng(from, to)
+	local diff = math_fmod(to - from, 360)
+	
+	return math_fmod(2 * diff, 360) - diff
+end
 
-	if d > 180 then
-		to = to - 360
-	elseif d < -180 then
-		to = to + 360
-	end
-
-	return Lerp(from, to, t)
+local function LerpDeg(from, to, t)
+	return from + CalcAng(from, to) * t
 end
 
 function tween.LerpAngle(from, to, t)
 	return Angle(
-		LerpAng(from.p, to.p, t),
-		LerpAng(from.y, to.y, t),
-		LerpAng(from.r, to.r, t)
+		LerpDeg(from.p, to.p, t),
+		LerpDeg(from.y, to.y, t),
+		LerpDeg(from.r, to.r, t)
 	)
 end
 
@@ -317,9 +316,9 @@ end
 
 local function LerpAngleUnpacked(angle, from, to, t)
 	angle:SetUnpacked(
-		LerpAng(from.p, to.p, t),
-		LerpAng(from.y, to.y, t),
-		LerpAng(from.r, to.r, t)
+		LerpDeg(from.p, to.p, t),
+		LerpDeg(from.y, to.y, t),
+		LerpDeg(from.r, to.r, t)
 	)
 end
 
