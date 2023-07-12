@@ -209,23 +209,21 @@ local metaTable_Vector2 = {
 	end,
 	
 	__mul = function(self, other)
-		if isvector2(self) and isnumber(other) then
+		if isnumber(other) then
 			return Vector2(self.x * other, self.y * other)
-		elseif isnumber(self) and isvector2(other) then
+		elseif isnumber(self) then
 			return Vector2(self * other.x, self * other.y)
-		else
-			return Vector2(self.x * other.x, self.y * other.y)
 		end
+		
+		return Vector2(self.x * other.x, self.y * other.y)
 	end,
 	
 	__div = function(self, other)
-		if isvector2(self) and isnumber(other) then
+		if isnumber(other) then
 			return Vector2(self.x / other, self.y / other)
-		elseif isnumber(self) and isvector2(other) then
-			return Vector2(self / other.x, self / other.y)
-		else
-			return Vector2(self.x / other.x, self.y / other.y)
 		end
+		
+		return Vector2(self.x / other.x, self.y / other.y)
 	end,
 	
 	__tostring = function(self)
