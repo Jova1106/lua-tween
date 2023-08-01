@@ -22,171 +22,44 @@
 
 --------------------------------------------------------------------------------
 
-local math_pi = math.pi
-local math_pow = math.pow
-local math_sqrt = math.sqrt
-local math_sin = math.sin
-local math_cos = math.cos
+tween = {}
+
 local math_fmod = math.fmod
 
 -- EASING FUNCTIONS
-function TWEEN_EASE_LINEAR(n)
-	return n
-end
-
-function TWEEN_EASE_IN_OUT(n)
-	return n * n * (3 - 2 * n)
-end
-
--- Credit: https://easings.net/
-function TWEEN_EASE_SINE_IN(n)
-	return 1 - math_cos(n * math_pi / 2)
-end
-
-function TWEEN_EASE_SINE_OUT(n)
-	return math_sin(n * math_pi / 2)
-end
-
-function TWEEN_EASE_SINE_IN_OUT(n)
-	return -(math_cos(math_pi * n) - 1) / 2
-end
-
-function TWEEN_EASE_QUAD_IN(n)
-	return n * n
-end
-
-function TWEEN_EASE_QUAD_OUT(n)
-	return 1 - (1 - n) * (1 - n)
-end
-
-function TWEEN_EASE_QUAD_IN_OUT(n)
-	return n < 0.5 and 2 * n * n or 1 - math_pow(-2 * n + 2, 2) / 2
-end
-
-function TWEEN_EASE_CUBIC_IN(n)
-	return n * n * n
-end
-
-function TWEEN_EASE_CUBIC_OUT(n)
-	return 1 - math_pow(1 - n, 3)
-end
-
-function TWEEN_EASE_CUBIC_IN_OUT(n)
-	return n < 0.5 and 4 * n * n * n or 1 - math_pow(-2 * n + 2, 3) / 2
-end
-
-function TWEEN_EASE_QUART_IN(n)
-	return n * n * n * n
-end
-
-function TWEEN_EASE_QUART_OUT(n)
-	return 1 - math_pow(1 - n, 4)
-end
-
-function TWEEN_EASE_QUART_IN_OUT(n)
-	return n < 0.5 and 8 * n * n * n * n or 1 - math_pow(-2 * n + 2, 4) / 2
-end
-
-function TWEEN_EASE_QUINT_IN(n)
-	return n * n * n * n * n
-end
-
-function TWEEN_EASE_QUINT_OUT(n)
-	return 1 - math_pow(1 - n, 5)
-end
-
-function TWEEN_EASE_QUINT_IN_OUT(n)
-	return n < 0.5 and 16 * n * n * n * n * n or 1 - math_pow(-2 * n + 2, 5) / 2
-end
-
-function TWEEN_EASE_EXPO_IN(n)
-	return n == 0 and 0 or math_pow(2, 10 * n - 10)
-end
-
-function TWEEN_EASE_EXPO_OUT(n)
-	return n == 1 and 1 or 1 - math_pow(2, -10 * n)
-end
-
-function TWEEN_EASE_EXPO_IN_OUT(n)
-	return n == 0 and 0 or n == 1 and 1 or n < 0.5 and math_pow(2, 20 * n - 10) / 2 or (2 - math_pow(2, -20 * n + 10)) / 2
-end
-
-function TWEEN_EASE_CIRC_IN(n)
-	return 1 - math_sqrt(1 - math_pow(n, 2))
-end
-
-function TWEEN_EASE_CIRC_OUT(n)
-	return math_sqrt(1 - math_pow(n - 1, 2))
-end
-
-function TWEEN_EASE_CIRC_IN_OUT(n)
-	return n < 0.5 and (1 - math_sqrt(1 - math_pow(2 * n, 2))) / 2 or (math_sqrt(1 - math_pow(-2 * n + 2, 2)) + 1) / 2
-end
-
-function TWEEN_EASE_BACK_IN(n)
-	local c1 = 1.70158
-	local c3 = c1 + 1
-
-	return c3 * n * n * n - c1 * n * n
-end
-
-function TWEEN_EASE_BACK_OUT(n)
-	local c1 = 1.70158
-	local c3 = c1 + 1
-
-	return 1 + c3 * math_pow(n - 1, 3) + c1 * math_pow(n - 1, 2)
-end
-
-function TWEEN_EASE_BACK_IN_OUT(n)
-	local c1 = 1.70158
-	local c2 = c1 * 1.525
-
-	return n < 0.5 and (math_pow(2 * n, 2) * ((c2 + 1) * 2 * n - c2)) / 2 or (math_pow(2 * n - 2, 2) * ((c2 + 1) * (n * 2 - 2) + c2) + 2) / 2
-end
-
-function TWEEN_EASE_ELASTIC_IN(n)
-	local c4 = (2 * math_pi) / 3
-
-	return n == 0 and 0 or n == 1 and 1 or -math_pow(2, 10 * n - 10) * math_sin((n * 10 - 10.75) * c4)
-end
-
-function TWEEN_EASE_ELASTIC_OUT(n)
-	local c4 = (2 * math_pi) / 3
-
-	return n == 0 and 0 or n == 1 and 1 or math_pow(2, -10 * n) * math_sin((n * 10 - 0.75) * c4) + 1
-end
-
-function TWEEN_EASE_ELASTIC_IN_OUT(n)
-	local c5 = (2 * math_pi) / 4.5
-
-	return n == 0 and 0 or n == 1 and 1 or n < 0.5 and -(math_pow(2, 20 * n - 10) * math_sin((20 * n - 11.125) * c5)) / 2 or (math_pow(2, -20 * n + 10) * math_sin((20 * n - 11.125) * c5)) / 2 + 1
-end
-
-function TWEEN_EASE_BOUNCE_IN(n)
-	return 1 - TWEEN_EASE_BOUNCE_OUT(1 - n)
-end
-
-function TWEEN_EASE_BOUNCE_OUT(n)
-	local n1 = 7.5625
-	local d1 = 2.75
-
-	if n < 1 / d1 then
-		return n1 * n * n
-	elseif n < 2 / d1 then
-		return n1 * (n - 1.5 / d1) * (n - 1.5 / d1) + 0.75
-	elseif n < 2.5 / d1 then
-		return n1 * (n - 2.25 / d1) * (n - 2.25 / d1) + 0.9375
-	else
-		return n1 * (n - 2.625 / d1) * (n - 2.625 / d1) + 0.984375
-	end
-end
-
-function TWEEN_EASE_BOUNCE_IN_OUT(n)
-	return n < 0.5 and (1 - TWEEN_EASE_BOUNCE_OUT(1 - 2 * n)) / 2 or (1 + TWEEN_EASE_BOUNCE_OUT(2 * n - 1)) / 2
-end
---------------------------------------------------------------------------------
-
-tween = {}
+TWEEN_EASE_LINEAR = function(n) return n end
+TWEEN_EASE_IN_OUT = math.EaseInOut
+TWEEN_EASE_SINE_IN = math.ease.InSine
+TWEEN_EASE_SINE_OUT = math.ease.OutSine
+TWEEN_EASE_SINE_IN_OUT = math.ease.InOutSine
+TWEEN_EASE_QUAD_IN = math.ease.InQuad
+TWEEN_EASE_QUAD_OUT = math.ease.OutQuad
+TWEEN_EASE_QUAD_IN_OUT = math.ease.InOutQuad
+TWEEN_EASE_CUBIC_IN = math.ease.InCubic
+TWEEN_EASE_CUBIC_OUT = math.ease.OutCubic
+TWEEN_EASE_CUBIC_IN_OUT = math.ease.InOutCubic
+TWEEN_EASE_QUART_IN = math.ease.InQuart
+TWEEN_EASE_QUART_OUT = math.ease.OutQuart
+TWEEN_EASE_QUART_IN_OUT = math.ease.InOutQuart
+TWEEN_EASE_QUINT_IN = math.ease.InQuint
+TWEEN_EASE_QUINT_OUT = math.ease.OutQuint
+TWEEN_EASE_QUINT_IN_OUT = math.ease.InOutQuint
+TWEEN_EASE_EXPO_IN = math.ease.InExpo
+TWEEN_EASE_EXPO_OUT = math.ease.OutExpo
+TWEEN_EASE_EXPO_IN_OUT = math.ease.InOutExpo
+TWEEN_EASE_CIRC_IN = math.ease.InCirc
+TWEEN_EASE_CIRC_OUT = math.ease.OutCirc
+TWEEN_EASE_CIRC_IN_OUT = math.ease.InOutCirc
+TWEEN_EASE_BACK_IN = math.ease.InBack
+TWEEN_EASE_BACK_OUT = math.ease.OutBack
+TWEEN_EASE_BACK_IN_OUT = math.ease.InOutBack
+TWEEN_EASE_ELASTIC_IN = math.ease.InElastic
+TWEEN_EASE_ELASTIC_OUT = math.ease.OutElastic
+TWEEN_EASE_ELASTIC_IN_OUT = math.ease.InOutElastic
+TWEEN_EASE_BOUNCE_IN = math.ease.InBounce
+TWEEN_EASE_BOUNCE_OUT = math.ease.OutBounce
+TWEEN_EASE_BOUNCE_IN_OUT = math.ease.InOutBounce
+--
 
 -- table.Inherit without the self.BaseClass table
 local function table_Inherit(target, base)
