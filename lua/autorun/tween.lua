@@ -25,8 +25,8 @@
 tween = {}
 
 local math_fmod = math.fmod
+local math_pow = math.pow
 
--- EASING FUNCTIONS
 TWEEN_EASE_LINEAR = function(n) return n end
 TWEEN_EASE_IN_OUT = math.EaseInOut
 TWEEN_EASE_SINE_IN = math.ease.InSine
@@ -59,9 +59,7 @@ TWEEN_EASE_ELASTIC_IN_OUT = math.ease.InOutElastic
 TWEEN_EASE_BOUNCE_IN = math.ease.InBounce
 TWEEN_EASE_BOUNCE_OUT = math.ease.OutBounce
 TWEEN_EASE_BOUNCE_IN_OUT = math.ease.InOutBounce
---
 
--- table.Inherit without the self.BaseClass table
 local function table_Inherit(target, base)
 	for k, v in next, base do
 		if target[k] then continue end
@@ -128,7 +126,6 @@ function Vector2(x, y)
 	return setmetatable(Vector2, metaTable_Vector2)
 end
 
--- Lerp Functions
 function tween.Lerp(from, to, t)
 	return (1 - t) * from + t * to
 end
@@ -193,24 +190,31 @@ local function LerpAngleUnpacked(angle, from, to, t)
 	)
 end
 
--- Credit: WLKRE (https://github.com/JWalkerMailly)
-function tween.BSpline(points, t, --[[internal]] i, --[[internal]] c)
-	if i == nil then
-		i, c = 1, #points
+local function BinomialCoefficient(n, k)
+	local result = 1
+	
+	for i = 1, k do
+		result = result * (n - i + 1) / i
 	end
 	
-	if c == 1 then return points[i] end
+	return result
+end
+
+function tween.BSpline(points, t)
+	local n = #points
+	local result = points[1]
 	
-	local p1 = tween.BSpline(points, t, i, c - 1)
-	local p2 = tween.BSpline(points, t, i + 1, c - 1)
+	for i = 1, n do
+		local weight = BinomialCoefficient(n - 1, i - 1) * math_pow(1 - t, n - i) * math_pow(t, i - 1)
+		
+		result = result + weight * points[i]
+	end
 	
-	return Lerp(p1, p2, t)
+	return result
 end
 
 local BSpline = tween.BSpline
---
 
--- Tween Object(s)
 local all_tweens = {}
 local running_tweens = {}
 local paused_tweens = {}
@@ -543,7 +547,6 @@ function BezierTween(points, duration, ease_type, callback)
 	return setmetatable(Tween, metaTable_BezierTween)
 end
 
--- Tween Handler
 hook.Add("Think", "process_tweens", function()
 	if table.IsEmpty(running_tweens) then return end
 	
