@@ -202,7 +202,7 @@ end
 
 function tween.BSpline(points, t)
 	local n = #points
-	local result = points[1]
+	local result = Vector(0, 0, 0)
 	
 	for i = 1, n do
 		local weight = BinomialCoefficient(n - 1, i - 1) * math_pow(1 - t, n - i) * math_pow(t, i - 1)
