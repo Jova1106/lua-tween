@@ -24,6 +24,7 @@
 
 tween = {}
 
+local isfunction = isfunction
 local math_fmod = math.fmod
 local math_pow = math.pow
 
@@ -371,6 +372,12 @@ local metaTable_Tween = {
 			local alpha = (time - self.start_time) / self.duration
 			
 			self.value = self.lerp_type(self.from, self.to, self.ease_type(alpha))
+			
+			local OnUpdate = self.OnUpdate
+			
+			if OnUpdate and isfunction(OnUpdate) then
+				self:OnUpdate()
+			end
 		end
 	end,
 	
@@ -462,6 +469,12 @@ local metaTable_TweenUnpacked = {
 				self.lerp_type_unpacked(base_object, self.from, to, self.ease_type(alpha))
 				self.value = base_object
 			end
+			
+			local OnUpdate = self.OnUpdate
+			
+			if OnUpdate and isfunction(OnUpdate) then
+				self:OnUpdate()
+			end
 		end
 	end
 }
@@ -524,6 +537,12 @@ local metaTable_BezierTween = {
 			local alpha = (time - self.start_time) / self.duration
 			
 			self.value = BSpline(points, self.ease_type(alpha))
+			
+			local OnUpdate = self.OnUpdate
+			
+			if OnUpdate and isfunction(OnUpdate) then
+				self:OnUpdate()
+			end
 		end
 	end,
 }
