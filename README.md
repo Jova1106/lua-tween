@@ -112,6 +112,7 @@ Note: Numbers technically work with TweenUnpacked, but since numbers aren't obje
 
 ### Ease Types Test:
 ```Lua
+local color_red = Color(255, 0, 0, 255)
 local tween_duration = 3
 local TWEEN_EASE_LINEAR_tween = Tween(10, 300, tween_duration, TWEEN_EASE_LINEAR)
 local TWEEN_EASE_IN_OUT_tween = Tween(10, 300, tween_duration, TWEEN_EASE_IN_OUT)
