@@ -27,6 +27,7 @@ tween = {}
 local isfunction = isfunction
 local math_fmod = math.fmod
 local math_pow = math.pow
+local Vector_0 = Vector(0, 0, 0)
 
 TWEEN_EASE_LINEAR = function(n) return n end
 TWEEN_EASE_IN_OUT = math.EaseInOut
@@ -203,7 +204,7 @@ end
 
 function tween.BSpline(points, t)
 	local n = #points
-	local result = Vector(0, 0, 0)
+	local result = Vector_0
 	
 	for i = 1, n do
 		local weight = BinomialCoefficient(n - 1, i - 1) * math_pow(1 - t, n - i) * math_pow(t, i - 1)
